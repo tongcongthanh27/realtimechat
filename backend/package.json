@@ -2,7 +2,8 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,11 +13,18 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/server": "^5.0.0",
+    "@as-integrations/express5": "^1.1.2",
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "graphql": "^16.11.0",
+    "graphql-subscriptions": "^3.0.0",
+    "graphql-tag": "^2.12.6",
     "graphql-ws": "^6.0.6",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.2",
     "nodemon": "^3.1.10",
     "ws": "^8.18.3"
   }
