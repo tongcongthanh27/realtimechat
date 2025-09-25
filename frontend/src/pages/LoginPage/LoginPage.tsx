@@ -1,26 +1,39 @@
-import React, { useState } from "react";
-import { Button, Input, Form, Typography, message } from "antd";
+import React from "react";
+import { Button, Input, Form, Typography, Image } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
-
+import chatIcon from "../../assets/realtime_chat_icon.png";
+import { useLogin } from "../../graphql/hooks/user";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../redux/store";
+import { setUser } from "../../redux/userSlice";
+import toast from "react-hot-toast";
 const { Title, Text } = Typography;
 
 const LoginPage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login, loading } = useLogin();
+  const dispatch = useDispatch<AppDispatch>();
 
-  const onFinish = (values: { username: string; password: string }) => {
-    setLoading(true);
-    const { username, password } = values;
+  const onFinish = async (values: { username: string; password: string }) => {
+    try {
+      const { username, password } = values;
 
-    // TODO: call your login API / Apollo mutation
-    console.log("Login attempt:", username, password);
-
-    setTimeout(() => {
-      setLoading(false);
-      message.success(`Welcome ${username}`);
-      navigate("/chat"); // redirect sau khi login thành công
-    }, 1000);
+      const response = await login(username, password);
+      dispatch(
+        setUser({
+          username: response?.user.username as string,
+          token: response?.token as string,
+          id: response?.user.id as string,
+        })
+      );
+      setTimeout(() => {
+        toast.success(`Welcome ${username}`);
+        navigate("/chat");
+      }, 1000);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -28,18 +41,24 @@ const LoginPage: React.FC = () => {
       style={{
         display: "flex",
         justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
         height: "100%",
         width: "100%",
         backgroundColor: "#f0f2f5",
       }}
     >
+      <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+        <Image src={chatIcon} preview={false} style={{ height: 64, width: 64, marginLeft: 8 }} />
+        <Title>Realtime Chat App</Title>
+      </div>
       <div
         style={{
           width: 350,
           padding: 30,
           background: "#fff",
           borderRadius: 8,
+          paddingTop: 8,
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         }}
       >

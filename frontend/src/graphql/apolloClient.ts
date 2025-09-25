@@ -13,6 +13,11 @@ const httpLink = new HttpLink({
 const wsLink = new GraphQLWsLink(
   createClient({
     url: "ws://localhost:4000/graphql",
+    on: {
+      connected: () => console.log("✅ WebSocket connected"),
+      closed: (event) => console.log("❌ WebSocket closed", event),
+    },
+    onNonLazyError: (error) => console.log("❌ WebSocket connection error:", error),
   })
 );
 

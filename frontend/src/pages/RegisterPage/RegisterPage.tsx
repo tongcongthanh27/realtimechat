@@ -1,49 +1,58 @@
-import React, { useState } from "react";
-import { Button, Input, Form, Typography, message } from "antd";
+import React from "react";
+import { Button, Input, Form, Typography, message, Image } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
+import { useRegister } from "../../graphql/hooks/user";
+import chatIcon from "../../assets/realtime_chat_icon.png";
 
 const { Title, Text } = Typography;
 
 const RegisterPage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register, loading } = useRegister();
 
-  const onFinish = (values: { username: string; password: string; confirm: string }) => {
-    const { username, password, confirm } = values;
+  const onFinish = async (values: { username: string; password: string; confirm: string }) => {
+    try {
+      const { username, password, confirm } = values;
+      if (password !== confirm) {
+        message.error("Password and confirm password do not match!");
+        return;
+      }
 
-    if (password !== confirm) {
-      message.error("Password and confirm password do not match!");
-      return;
+      console.log("Register attempt:", username, password);
+      const response = await register(username, password);
+      console.log(response);
+
+      setTimeout(() => {
+        message.success(`Account created for ${username}`);
+        navigate("/login"); // redirect về LoginPage
+      }, 1000);
+    } catch (e) {
+      console.log(e);
     }
-
-    setLoading(true);
-
-    // TODO: call your register API / Apollo mutation
-    console.log("Register attempt:", username, password);
-
-    setTimeout(() => {
-      setLoading(false);
-      message.success(`Account created for ${username}`);
-      navigate("/login"); // redirect về LoginPage
-    }, 1000);
   };
 
   return (
     <div
       style={{
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
         backgroundColor: "#f0f2f5",
       }}
     >
+      <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+        <Image src={chatIcon} preview={false} style={{ height: 64, width: 64, marginLeft: 8 }} />
+        <Title>Realtime Chat App</Title>
+      </div>
       <div
         style={{
           width: "90%",
           maxWidth: 400,
           padding: 30,
+          paddingTop: 8,
           background: "#fff",
           borderRadius: 8,
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",

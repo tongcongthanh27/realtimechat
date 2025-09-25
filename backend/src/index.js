@@ -8,6 +8,9 @@ import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/use/ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import { pubsub } from "./pubsub.js";
+
 dotenv.config();
 
 import { typeDefs } from "./schema.js";
@@ -23,7 +26,26 @@ await server.start();
 
 // 3. Express app
 const app = express();
-app.use(cors(), bodyParser.json(), expressMiddleware(server));
+app.use(
+  cors(),
+  bodyParser.json(),
+  expressMiddleware(server, {
+    context: async ({ req }) => {
+      const auth = req.headers.authorization || "";
+      if (auth) {
+        try {
+          const token = auth.replace("Bearer ", "");
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+          return { user: decoded };
+        } catch (err) {
+          console.log("Invalid token: ", err);
+        }
+      }
+      return {};
+    },
+  })
+);
 
 // 4. HTTP server chung
 const httpServer = http.createServer(app);
@@ -33,7 +55,19 @@ const wsServer = new WebSocketServer({
   server: httpServer,
   path: "/graphql",
 });
-useServer({ schema }, wsServer);
+// useServer({ schema }, wsServer);
+
+useServer(
+  {
+    schema,
+    context: async (ctx, msg, args) => {
+      return {
+        pubsub,
+      };
+    },
+  },
+  wsServer
+);
 
 // 6. Listen
 const PORT = process.env.PORT || 4000;

@@ -1,12 +1,35 @@
 import Room from "../models/room.js";
+import { GraphQLError } from "graphql";
+import { statusCode } from "../core/statusCode.js";
 
 export const roomResolvers = {
   Query: {
-    rooms: async () => Room.find().populate("members"),
-    room: async (_, { id }) => Room.findById(id).populate("members"),
+    getListRoom: async (_, __, { user }) => {
+      if (!user) {
+        throw new GraphQLError("Unauthorized", {
+          extensions: { code: statusCode.UNAUTHENTICATED },
+        });
+      }
+      const rooms = Room.find().populate("members");
+      return rooms;
+    },
+    getRoom: async (_, { id }, { user }) => {
+      if (!user) {
+        throw new GraphQLError("Unauthorized", {
+          extensions: { code: statusCode.UNAUTHENTICATED },
+        });
+      }
+      const room = Room.findById(id).populate("members");
+      return room;
+    },
   },
   Mutation: {
-    createRoom: async (_, { name, memberIds }) => {
+    createRoom: async (_, { name, memberIds }, { user }) => {
+      if (!user) {
+        throw new GraphQLError("Unauthorized", {
+          extensions: { code: statusCode.UNAUTHENTICATED },
+        });
+      }
       const room = new Room({ name, members: memberIds });
       await room.save();
       return room.populate("members");

@@ -2,52 +2,47 @@
 import { gql } from "graphql-tag";
 
 export const typeDefs = gql`
-  # =========================
-  # User
-  # =========================
   type User {
     id: ID!
     username: String!
   }
-
-  # =========================
-  # Message
-  # =========================
-  type Message {
-    id: ID!
-    content: String!
-    sender: User! # từ User
-    to: String! # 'all', 'user:<id>', 'room:<id>'
-    createdAt: String!
-  }
-
-  # =========================
-  # Room
-  # =========================
   type Room {
     id: ID!
     name: String!
     members: [User!]!
     createdAt: String!
   }
-
-  # =========================
-  # Queries
-  # =========================
-  type Query {
-    me: User
-    messages(to: String!): [Message!]!
-    rooms: [Room!]!
-    room(id: ID!): Room
+  type Message {
+    id: ID!
+    content: String!
+    sender: User! # từ User
+    receiverUser: User
+    receiverRoom: Room
+    createdAt: String!
+  }
+  type LoginResponse {
+    token: String!
+    user: User!
+  }
+  type RegisterResponse {
+    user: User!
   }
 
-  # =========================
-  # Mutations
-  # =========================
+  type Query {
+    getListUser: [User!]
+    getUser(id: ID!): User!
+
+    getListRoom: [Room!]!
+    getRoom(id: ID!): Room!
+
+    getListMessage(receiverId: String!): [Message!]!
+  }
   type Mutation {
-    register(username: String!, password: String!): String! # JWT
-    login(username: String!, password: String!): String! # JWT
-    postMessage(content: String!, to: String!): Message!
+    register(username: String!, password: String!): RegisterResponse!
+    login(username: String!, password: String!): LoginResponse!
+
+    postMessage(content: String!, receiverId: String!): Message!
+
     createRoom(name: String!, memberIds: [ID!]!): Room!
     addMemberToRoom(roomId: ID!, userId: ID!): Room!
   }
@@ -56,6 +51,6 @@ export const typeDefs = gql`
   # Subscriptions
   # =========================
   type Subscription {
-    messageAdded(to: String!): Message!
+    messageAdded(receiverId: String!): Message!
   }
 `;
