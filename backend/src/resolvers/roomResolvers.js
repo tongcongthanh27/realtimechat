@@ -4,14 +4,18 @@ import { statusCode } from "../core/statusCode.js";
 
 export const roomResolvers = {
   Query: {
-    getListRoom: async (_, __, { user }) => {
+    getListRoom: async (_, { receiverId }, { user }) => {
       if (!user) {
         throw new GraphQLError("Unauthorized", {
           extensions: { code: statusCode.UNAUTHENTICATED },
         });
       }
-      const rooms = Room.find().populate("members");
-      return rooms;
+      console.log(receiverId);
+      const rooms = await Room.find().populate("members");
+      console.log(rooms[0].members);
+      const res = rooms.filter((room) => room.members.some((m) => m.id.toString() === receiverId));
+      console.log(res.length);
+      return res;
     },
     getRoom: async (_, { id }, { user }) => {
       if (!user) {

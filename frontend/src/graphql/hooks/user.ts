@@ -1,15 +1,11 @@
-import { useMutation } from "@apollo/client/react";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 import { LOGIN_MUTATION, REGISTER_MUTATION } from "../mutations/user";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../redux/store";
+import type { ListUserResponse, LoginResponse, RegisterResponse } from "../types/index";
+import { GET_LIST_USER_QUERY } from "../querys/user";
 
-interface RegisterResponse {
-  register: {
-    user: {
-      id: string;
-      username: string;
-    };
-  };
-}
 export const useRegister = () => {
   const [registerMutation, { data, loading, error }] = useMutation<RegisterResponse>(REGISTER_MUTATION);
 
@@ -34,15 +30,6 @@ export const useRegister = () => {
   return { register, data, loading, error };
 };
 
-interface LoginResponse {
-  login: {
-    token: string;
-    user: {
-      id: string;
-      username: string;
-    };
-  };
-}
 export const useLogin = () => {
   const [loginMuation, { data, loading, error }] = useMutation<LoginResponse>(LOGIN_MUTATION);
   const login = async (username: string, password: string) => {
@@ -51,4 +38,23 @@ export const useLogin = () => {
   };
 
   return { login, data, loading, error };
+};
+
+export const useGetUserList = () => {
+  const token = useSelector((state: RootState) => state.user.token);
+  const [loadUsers, { data, loading, error }] = useLazyQuery<ListUserResponse>(GET_LIST_USER_QUERY, {
+    fetchPolicy: "network-only",
+  });
+
+  const getUserList = () => {
+    loadUsers({
+      context: {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      },
+    });
+  };
+
+  return { getUserList, data: data?.getListUser, loading, error };
 };
