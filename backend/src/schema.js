@@ -32,7 +32,7 @@ export const typeDefs = gql`
     getListUser: [User!]
     getUser(id: ID!): User!
 
-    getListRoom: [Room!]!
+    getListRoom(receiverId: String!): [Room!]!
     getRoom(id: ID!): Room!
 
     getListMessage(receiverId: String!): [Message!]!
