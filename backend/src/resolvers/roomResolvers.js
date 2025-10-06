@@ -10,11 +10,11 @@ export const roomResolvers = {
           extensions: { code: statusCode.UNAUTHENTICATED },
         });
       }
-      console.log(receiverId);
+      // console.log(receiverId);
       const rooms = await Room.find().populate("members");
-      console.log(rooms[0].members);
+      // console.log(rooms[0].members);
       const res = rooms.filter((room) => room.members.some((m) => m.id.toString() === receiverId));
-      console.log(res.length);
+      // console.log(res.length);
       return res;
     },
     getRoom: async (_, { id }, { user }) => {

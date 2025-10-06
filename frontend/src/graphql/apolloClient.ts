@@ -3,8 +3,7 @@ import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 import type { OperationDefinitionNode } from "graphql";
-
-// HTTP link cho query/mutation
+import { store } from "../redux/store";
 const httpLink = new HttpLink({
   uri: "http://localhost:4000/graphql",
 });
@@ -13,6 +12,15 @@ const httpLink = new HttpLink({
 const wsLink = new GraphQLWsLink(
   createClient({
     url: "ws://localhost:4000/graphql",
+    // url: "ws://localhost:5000/graphql",
+    lazy: true,
+    connectionParams: () => {
+      const token = store.getState().user.token;
+      console.log(token);
+      return {
+        authorization: token ? `Bearer ${token}` : "",
+      };
+    },
     on: {
       connected: () => console.log("✅ WebSocket connected"),
       closed: (event) => console.log("❌ WebSocket closed", event),
